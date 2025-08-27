@@ -2,4 +2,8 @@ Beau Brechtel
 
 Design Document
 
+Main:
+    - Prompts user for a command after introduction and list of commands
+    - From there the user can input a command to run specific part of Compiler
+
 Lexer
