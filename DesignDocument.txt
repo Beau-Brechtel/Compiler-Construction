@@ -2,8 +2,54 @@ Beau Brechtel
 
 Design Document
 
+Grammar
+
+            program         -> func_decl_list 
+            func_decl_list  -> func_decl | func_decl_list func_decl 
+            func_decl       -> type IDENTIFIER () { stmt_list } ;
+            stmt_list       -> stmt | stmt_list stmt 
+            stmt            -> return_stmt | var_decl | assignment | if_stmt| while_stmt | for_stmt
+            return_stmt     -> "return" Expression ;
+            var_decl        -> type IDENTIFIER = Expression ; | type IDENTIFIER ;
+            assignment      -> IDENTIFIER = Expression ;
+            if_stmt         -> if ( Expression )  { stmt_list } | if ( Expression ) { stmt_list } else { stmt_list } ;
+            while_stmt      -> while ( Expression ) { stmt_list } ;
+            for_stmt        -> for (  var_decl | assignment ; Expression ; assignment ) { stmt_list } ;
+            type            -> int | float | char | double 
+            Expression      -> Expression > binary_expr | Expression < binary_expr | Expression == binary_expr | binary_expr
+            binary_expr     -> binary_expr + Term | binary_expr - Term | Term
+            term            -> Term * Value | Term / Value | Value
+            value.          -> NUM | ID | (Expression)
+
+
+
+
 Main:
     - Prompts user for a command after introduction and list of commands
     - From there the user can input a command to run specific part of Compiler
 
 Lexer
+
+    Keywords: 
+        - if
+        - else 
+        - while
+        - for
+        - return
+
+    Token Object Keeps Track of:
+        - type
+        - value
+        - line
+        - column
+
+    Before we go through every line and column I get rid of any comments by finding and replacing them with ''.
+
+    First looks for keywords then numbers, then identifiers, then strings, then operators (2 character ones first), and then whitespaces(do this so we can check token type and if whitespace we dont add it to token list).
+
+    Go through line by line and character by character tyring to make a match with one of my token types. If i go through all my token types and dont get a match call it an unknown token.
+
+    Once we reach the end of the lines add an EOF token to tell us we are done (might get rid of later)
+
+Parser 
+    - Starting with an expression parser

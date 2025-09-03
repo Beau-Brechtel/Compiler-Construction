@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 
 class TokenType(Enum):
@@ -46,10 +46,10 @@ class TokenType(Enum):
     RIGHT_BRACE = "RIGHT_BRACE"
     
     # Special tokens
+    EOF = "EOF"
     COMMENT = "COMMENT"
     WHITESPACE = "WHITESPACE"
     NEWLINE = "NEWLINE"
-    EOF = "EOF"
     UNKNOWN = "UNKNOWN"
 
 
