@@ -14,18 +14,9 @@ def run_lexer(input_file):
     Args:
         input_file: Path to the source code file
     """
-
-    # Check if Lexer is available
-    if not Lexer:
-        print("Error: Lexer not available")
-        return False
     
     # Tries to read input file and run lexer
     try:
-        # Check if input file exists
-        if not os.path.exists(input_file):
-            print(f"Error: Input file '{input_file}' not found")
-            return False
         
         # Read source code
         with open(input_file, 'r') as f:
@@ -42,13 +33,14 @@ def run_lexer(input_file):
         
         return True
     
+    # Might add better errors later
     except Exception as e:
         print(f"Error during lexical analysis: {e}")
         return False
 
 def main():
     """
-    Usage: python3 compiler.py [options] <input_file>
+    To run: python3 compiler.py [options] <input_file>
     """
     parser = argparse.ArgumentParser(description='Compiler for Beau\'s C language')
 
@@ -69,16 +61,12 @@ def main():
         print(f"Error: Input file '{args.input_file}' not found")
         return
     
-    # Print help if no operation specified for now
-    if not args.lexer:
-        parser.print_help()
-        return
-    
     # Run lexer
     if args.lexer:
         print(f"Running lexer on: {args.input_file}")
         success = run_lexer(args.input_file)
         if not success:
+            #maybe better error handling later
             sys.exit(1)
 
 
