@@ -1,6 +1,7 @@
 import re
 from enum import Enum
 from typing import List
+from Errors import LexerError
 
 
 class TokenType(Enum):
@@ -158,13 +159,11 @@ class Lexer:
                         match_found = True
                         break
                 
-                # If no pattern matched, go to UNKNOWN token
+                # If no pattern matched, throw error for unknown character
                 if not match_found:
                     unknown_char = line[position]
-                    token = Token(TokenType.UNKNOWN, unknown_char, line_num, position + 1) 
-                    tokens.append(token)
-                    position += 1
-        
+                    raise LexerError(f"Unknown character seen during tokenization: '{unknown_char}'", line_num, position + 1)
+
         return tokens
     
     # Takes in source code string and removes all comments

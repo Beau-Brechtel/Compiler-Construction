@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import lexer
+from Errors import LexerError
 
 # Sets up and runs the lexer
 # input_file: Path to the source code file
@@ -26,7 +27,12 @@ def run_lexer(input_file):
         
         return True
     
-    # Might add better errors later
+    # Handle lexer errors 
+    except LexerError as e:
+        print(e)
+        return False
+    
+    # Handle other errors
     except Exception as e:
         print(f"Error during lexical analysis: {e}")
         return False
@@ -51,7 +57,6 @@ def main():
         print(f"Running lexer on: {args.input_file}")
         success = run_lexer(args.input_file)
         if not success:
-            #maybe better error handling later
             sys.exit(1)
 
 
