@@ -1,19 +1,11 @@
 import sys
 import os
 import argparse
+import lexer
 
-# Import compiler components
-try:
-    from lexer import Lexer
-except ImportError:
-    print("Warning: Lexer not found or not properly implemented")
-    Lexer = None
-
+# Sets up and runs the lexer
+# input_file: Path to the source code file
 def run_lexer(input_file):
-    """
-    Args:
-        input_file: Path to the source code file
-    """
     
     # Tries to read input file and run lexer
     try:
@@ -23,10 +15,11 @@ def run_lexer(input_file):
             source_code = f.read()
         
         # Initialize and run lexer
-        lexer = Lexer()
-        tokens = lexer.tokenize(source_code)
-        
-        # Output tokens 
+        # Returns list of token objects
+        my_lexer = lexer.Lexer()
+        tokens = my_lexer.tokenize(source_code)
+
+        # Output tokens
         print("Tokens:")
         for token in tokens:
             print(token)
@@ -38,22 +31,14 @@ def run_lexer(input_file):
         print(f"Error during lexical analysis: {e}")
         return False
 
+# Main function to handle command-line arguments and run all compiler parts
+# To run compiler: python3 compiler.py [options] <input_file>
 def main():
-    """
-    To run: python3 compiler.py [options] <input_file>
-    """
-    parser = argparse.ArgumentParser(description='Compiler for Beau\'s C language')
 
-    # Command-line arguments
+    # Command-line arguments for actually running the compiler
+    parser = argparse.ArgumentParser(description='Compiler for Beau\'s C language')
     parser.add_argument('input_file', help='Input source code file')
-    parser.add_argument('-l', '--lexer', action='store_true', 
-                       help='Run lexer and print tokens')
-    
-    # If no arguments provided show help
-    if len(sys.argv) == 1:
-        parser.print_help()
-        return
-    
+    parser.add_argument('-l', '--lexer', action='store_true', help='Run lexer and print tokens')
     args = parser.parse_args()
     
     # See if input file exists

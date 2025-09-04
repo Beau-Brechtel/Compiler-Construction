@@ -1,11 +1,9 @@
 import re
 from enum import Enum
-from dataclasses import dataclass
 from typing import List
 
 
 class TokenType(Enum):
-    # Tokens
 
     # Literals
     NUMBER = "NUMBER"
@@ -19,6 +17,8 @@ class TokenType(Enum):
     FOR = "FOR"
     RETURN = "RETURN"
     MAIN = "MAIN"
+
+    # Keywords - data types
     INT = "INT"
     FLOAT = "FLOAT"
     CHAR = "CHAR"
@@ -45,20 +45,17 @@ class TokenType(Enum):
     LEFT_BRACE = "LEFT_BRACE"
     RIGHT_BRACE = "RIGHT_BRACE"
     
-    # Special tokens
-    EOF = "EOF"
-    COMMENT = "COMMENT"
+    # Other
     WHITESPACE = "WHITESPACE"
-    NEWLINE = "NEWLINE"
     UNKNOWN = "UNKNOWN"
 
 
-@dataclass
 class Token:
-    type: TokenType
-    value: str
-    line: int
-    column: int
+    def __init__(self, type: TokenType, value: str, line: int, column: int):
+        self.type = type
+        self.value = value
+        self.line = line
+        self.column = column
     
     def __str__(self) -> str:
         # String print out
@@ -68,7 +65,7 @@ class Token:
 class Lexer:
     
     def __init__(self):
-        #Initialize Lexer
+        # Initialize Lexer
         # Token patterns 
         self.token_patterns = [
             # Keywords 
@@ -113,32 +110,31 @@ class Lexer:
             (r'\{', TokenType.LEFT_BRACE),
             (r'\}', TokenType.RIGHT_BRACE),
             
-            # Whitespace and newlines
+            # Whitespace
             (r'[ \t]+', TokenType.WHITESPACE),
-            (r'\n', TokenType.NEWLINE),
         ]
         
         # Compile all regex patterns 
-        self.compiled_patterns = [(re.compile(pattern), token_type) 
-                                for pattern, token_type in self.token_patterns]
+        self.compiled_patterns = [(re.compile(pattern), token_type) for pattern, token_type in self.token_patterns]
     
+    # Tokenize the given source code and return a list of tokens
     def tokenize(self, source_code: str) -> List[Token]:
-        # Tokenize the given source code and return a list of tokens
     
-        # Create empty token list
+        # Create empty token list that we will end up returning
         tokens = []
         
         # Handle comments first by removing them from the entire source
         source_code = self._remove_comments(source_code)
         
+        # Split source code into lines for line/column tracking
         lines = source_code.split('\n')
         
-        # Loop through each line 
+        # Loop through all the lines 
         for line_num, line in enumerate(lines, 1):
             column = 1
             position = 0
 
-            # Loop through the line
+            # Going through each line
             while position < len(line):
                 match_found = False
 
@@ -149,7 +145,7 @@ class Lexer:
                         value = match.group(0)
                         
                         # Skip whitespace tokens
-                        if token_type == TokenType.WHITESPACE or token_type == TokenType.NEWLINE:
+                        if token_type == TokenType.WHITESPACE:
                             position = match.end()
                             column += len(value)
                             match_found = True
@@ -173,19 +169,16 @@ class Lexer:
                     position += 1
                     column += 1
         
-        # Add EOF token
-        final_line = len(lines)
-        final_column = len(lines[-1]) + 1 if lines else 1
-        tokens.append(Token(TokenType.EOF, '', final_line, final_column))
-        
         return tokens
     
+    # Takes in source code string and removes all comments
+    # Returns source code as a string without comments
     def _remove_comments(self, source_code: str) -> str:
-        # Remove multi-line comments /* ... */
+        # Remove multi-line comments 
         multiline_comment = re.compile(r'/\*.*?\*/', re.DOTALL)
         source_code = multiline_comment.sub('', source_code)
         
-        # Remove single-line comments // ...
+        # Remove single-line comments 
         oneline_comment = re.compile(r'//.*')
         source_code = oneline_comment.sub('', source_code)
 
