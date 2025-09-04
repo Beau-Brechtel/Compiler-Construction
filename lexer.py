@@ -131,7 +131,6 @@ class Lexer:
         
         # Loop through all the lines 
         for line_num, line in enumerate(lines, 1):
-            column = 1
             position = 0
 
             # Going through each line
@@ -147,27 +146,24 @@ class Lexer:
                         # Skip whitespace tokens
                         if token_type == TokenType.WHITESPACE:
                             position = match.end()
-                            column += len(value)
                             match_found = True
                             break
                         
                         # Create token for tokens that are not whitespace
-                        token = Token(token_type, value, line_num, column)
+                        token = Token(token_type, value, line_num, position + 1) 
                         tokens.append(token)
                         
                         # Move position forward
                         position = match.end()
-                        column += len(value)
                         match_found = True
                         break
                 
                 # If no pattern matched, go to UNKNOWN token
                 if not match_found:
                     unknown_char = line[position]
-                    token = Token(TokenType.UNKNOWN, unknown_char, line_num, column)
+                    token = Token(TokenType.UNKNOWN, unknown_char, line_num, position + 1) 
                     tokens.append(token)
                     position += 1
-                    column += 1
         
         return tokens
     
