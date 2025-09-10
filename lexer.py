@@ -10,6 +10,7 @@ class TokenType(Enum):
     NUMBER = "NUMBER"
     STRING = "STRING"
     IDENTIFIER = "IDENTIFIER"
+    INVALID_IDENTIFIER = "INVALID_IDENTIFIER"
     
     # Keywords 
     IF = "IF"
@@ -67,7 +68,8 @@ class Lexer:
     
     def __init__(self):
         # Initialize Lexer
-        # Token patterns 
+        # Token patterns
+        # Regular Expressions created with help from Copilot
         self.token_patterns = [
             # Keywords 
             (r'\bif\b', TokenType.IF),
@@ -81,6 +83,9 @@ class Lexer:
             (r'\bchar\b', TokenType.CHAR),
             (r'\bdouble\b', TokenType.DOUBLE),
 
+            # Invalid identifiers
+            (r'\d+[a-zA-Z_][a-zA-Z0-9_]*', TokenType.INVALID_IDENTIFIER),
+            
             # Numbers
             (r'\d+\.\d+', TokenType.NUMBER),  
             (r'\d+', TokenType.NUMBER),       
@@ -149,6 +154,10 @@ class Lexer:
                             position = match.end()
                             match_found = True
                             break
+                        
+                        # Handle invalid identifiers
+                        if token_type == TokenType.INVALID_IDENTIFIER:
+                            raise LexerError(f"Invalid identifier '{value}'", line_num, position + 1)
                         
                         # Create token for tokens that are not whitespace
                         token = Token(token_type, value, line_num, position + 1) 

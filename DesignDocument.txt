@@ -31,7 +31,7 @@ Main:
     - Has a list of args that user can use when running compiler
     -l runs lexer and outputs tokens
     
-
+# Used Copilot in helping structure file as well as create regular expressions
 Lexer
 
     Keywords: 
@@ -46,6 +46,8 @@ Lexer
         - value
         - line
         - column
+
+    Identifiers Definition: A letter or an underscore followed by any number of optional letters, digits, or underscores
 
     Before we go through every line and column I get rid of any comments by finding and replacing them with ''.
 
