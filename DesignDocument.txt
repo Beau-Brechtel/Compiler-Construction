@@ -2,7 +2,7 @@ Beau Brechtel
 
 Design Document
 
-Grammar
+Work In Progress Grammar
 
             program         -> func_decl_list 
             func_decl_list  -> func_decl | func_decl_list func_decl 
@@ -19,14 +19,18 @@ Grammar
             Expression      -> Expression > binary_expr | Expression < binary_expr | Expression == binary_expr | binary_expr
             binary_expr     -> binary_expr + Term | binary_expr - Term | Term
             term            -> Term * Value | Term / Value | Value
-            value.          -> NUM | ID | (Expression)
+            value           -> NUM | ID | (Expression)
 
 
+Errors:
+    Will be able to handle different errors in differetn areas of compiler.
 
+    Lexer -> Unknown token sends a lexer error
 
 Main:
-    - Prompts user for a command after introduction and list of commands
-    - From there the user can input a command to run specific part of Compiler
+    - Has a list of args that user can use when running compiler
+    -l runs lexer and outputs tokens
+    
 
 Lexer
 
