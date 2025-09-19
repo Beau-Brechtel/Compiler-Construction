@@ -22,6 +22,15 @@ class symbol_table:
             return self.scopes['global'][name]
         return None
     
+    # Get all the parameters of a function
+    def get_function_params(self, function_name):
+        params = []
+        if function_name in self.scopes:
+            for symbol_name, symbol_entry in self.scopes[function_name].items():
+                if symbol_entry.kind == "parameter":
+                    params.append(symbol_entry)
+        return params if params else None
+    
     # Print the entire symbol table
     def print_table(self):
         if not self.scopes:

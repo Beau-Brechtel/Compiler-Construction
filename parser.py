@@ -39,9 +39,12 @@ class Parser:
 
         # Start looping through tokens and building AST
         while self.lookahead is not None:
-            decl = self.parse_decl()
-            if decl is not None:
-                program_root.add_child(decl)
+            try:
+                decl = self.parse_decl()
+                if decl is not None:
+                    program_root.add_child(decl)
+            except Exception as e:
+                raise
 
         # Return AST tree and symbol table
         return program_root, self.symbol_table
@@ -63,7 +66,7 @@ class Parser:
             return self.parse_func_decl(token)
         else:
             self.symbol_table.add_symbol(token.value, type, scope, "variable")
-            return self.parse_var_decl("global", token, type)
+            return self.parse_var_decl(scope, token, type)
 
     # Parses a single function declaration
     def parse_func_decl(self, func_token):
@@ -94,7 +97,7 @@ class Parser:
         self.match(self.lookahead.type)
         arg_token = self.lookahead
         self.match(TokenType.IDENTIFIER)
-        self.symbol_table.add_symbol(arg_token.value, type, scope, "variable")
+        self.symbol_table.add_symbol(arg_token.value, type, scope, "parameter")
 
         if self.lookahead.type == TokenType.COMMA:
             self.match(TokenType.COMMA)
@@ -281,13 +284,17 @@ class Parser:
             identifier_token = self.lookahead
             self.match(TokenType.IDENTIFIER)
             valid = self.symbol_table.lookup(identifier_token.value, scope)
-            
-            # make sure variable is declared and types match
-            if valid is None :
-                raise ParsingError(f"Undeclared variable {identifier_token.value}", identifier_token.line, identifier_token.column)
-            elif valid.type != type and type != "bool":
-                raise ParsingError(f"Type mismatch: expected {type} but found {valid.type}", identifier_token.line, identifier_token.column)
-            return AST.AST(identifier_token)
+
+            if (valid is not None and valid.kind == "function") and (valid.type == type or type == "bool"):
+                # Function call
+                return self.func_call(identifier_token, scope)
+            else:
+                # make sure variable or function is declared and types match
+                if valid is None :
+                    raise ParsingError(f"Undeclared variable {identifier_token.value}", identifier_token.line, identifier_token.column)
+                elif valid.type != type and type != "bool":
+                    raise ParsingError(f"Type mismatch: expected {type} but found {valid.type}", identifier_token.line, identifier_token.column)
+                return AST.AST(identifier_token)
         # Floats
         elif self.lookahead.type == TokenType.FLOATING_NUMBER:
             if type != "float" and type != "bool":
@@ -331,3 +338,31 @@ class Parser:
         else:
             ttail.add_child(factor)
             return ttail
+        
+    # Parses a function call
+    def func_call(self, function_identifier, scope):
+        func_token = AST.AST(function_identifier)  
+        self.match(TokenType.LEFT_PAREN)
+        if self.lookahead.type != TokenType.RIGHT_PAREN:
+            func_token.add_child(self.parse_args(scope, self.symbol_table.get_function_params(function_identifier.value)))
+        self.match(TokenType.RIGHT_PAREN)
+        return func_token
+    
+    # Parses function call arguments
+    def parse_args(self, scope, params):
+        if params is None:
+            raise ParsingError(f"Function expects no arguments but arguments were provided", self.lookahead.line, self.lookahead.column)
+
+        argument_token = Token(TokenType.PARSING_TOKEN, "Arguments", None, None)
+        args = AST.AST(argument_token)
+
+        for param in params:
+            arg = self.parse_bool_expr(scope, param.type)
+            args.add_child(arg)
+            if self.lookahead.type == TokenType.COMMA:
+                self.match(TokenType.COMMA)
+            else:
+                break
+
+        return args
+        

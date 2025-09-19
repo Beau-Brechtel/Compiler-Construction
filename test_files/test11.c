@@ -9,7 +9,7 @@ int add(int a, int b) {
 
 int main() {
     int localVar = 5;
-    //int result = add(localVar, globalVar);
+    int result = add(localVar, globalVar);
 
     return localVar + globalVar;
 }
