@@ -56,4 +56,4 @@ class symbol_table_entry:
         self.kind = kind
 
     def __str__(self):
-        return f"Name: {self.name}, Type: {self.type}, Scope: {self.scope}"
+        return f"Name: {self.name}, Type: {self.type}, Scope: {self.scope}, Kind: {self.kind}"
