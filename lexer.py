@@ -10,6 +10,7 @@ class TokenType(Enum):
     NUMBER = "NUMBER"
     FLOATING_NUMBER = "FLOATING_NUMBER"
     STRING = "STRING"
+    CHARACTER = "CHARACTER"
     IDENTIFIER = "IDENTIFIER"
     INVALID_IDENTIFIER = "INVALID_IDENTIFIER"
     
@@ -100,11 +101,11 @@ class Lexer:
             # Identifiers
             (r'[a-zA-Z_][a-zA-Z0-9_]*', TokenType.IDENTIFIER),
             
-            # String literals
+            # String literals and character literals
             (r'"[^"]*"', TokenType.STRING),
-            (r"'[^']*'", TokenType.STRING),
-            
-            # Two-character operators 
+            (r"'[^']*'", TokenType.CHARACTER),
+
+            # Two-character operators
             (r'==', TokenType.EQUAL),
             (r'!=', TokenType.NOT_EQUAL),
             

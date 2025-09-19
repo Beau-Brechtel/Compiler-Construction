@@ -8,7 +8,7 @@ class Parser:
         self.tokens = []
         self.current_token_index = 0
         self.lookahead = None
-        self.symbol_table = SymbolTable.symbol_table()  # Global symbol table
+        self.symbol_table = SymbolTable.symbol_table()  
 
     # Move to the next token 
     def consume(self):
@@ -29,57 +29,78 @@ class Parser:
     # Main parse function that starts the parsing process
     def parse(self, tokens):
         self.tokens = tokens
-        self.current_token_index = 0
         
         # Initialize lookahead token
         self.consume()
 
-        # Create root of AST - similar to stmt_list pattern
+        # Create root of AST 
         program_token = Token(TokenType.PARSING_TOKEN, "Program", None, None)
         program_root = AST.AST(program_token)
 
         # Start looping through tokens and building AST
         while self.lookahead is not None:
-            func_decl = self.parse_func_decl()
-            if func_decl is not None:
-                program_root.add_child(func_decl)
+            decl = self.parse_decl()
+            if decl is not None:
+                program_root.add_child(decl)
 
         # Return AST tree and symbol table
         return program_root, self.symbol_table
 
-    # Parses a single function declaration
-    def parse_func_decl(self):
-
-        # Get return type and validate it
-        return_type = self.lookahead.value
+    def parse_decl(self, scope = "global"):
+        type = self.lookahead.value
         if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL, TokenType.VOID]:
-            raise ParsingError(f"Unexpected return type {return_type}", self.lookahead.line, self.lookahead.column)
-        self.match(self.lookahead.type)
-            
-        # Get function name
-        func_name = self.lookahead.value
-        func_name_token = self.lookahead  # Save the actual token
-        if self.lookahead.type not in [TokenType.IDENTIFIER, TokenType.MAIN]:
-            raise ParsingError(f"Expected function name but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
+            raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
 
-        # Add function to symbol table
-        self.symbol_table.add_symbol(func_name, return_type, "global", "function")
+        # Get function/variable name
+        token = self.lookahead 
+        if self.lookahead.type not in [TokenType.IDENTIFIER, TokenType.MAIN]:
+            raise ParsingError(f"Expected name but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
+        self.match(self.lookahead.type)
+
+        if self.lookahead.type == TokenType.LEFT_PAREN:
+            self.symbol_table.add_symbol(token.value, type, scope, "function")
+            return self.parse_func_decl(token)
+        else:
+            self.symbol_table.add_symbol(token.value, type, scope, "variable")
+            return self.parse_var_decl("global", token, type)
+
+    # Parses a single function declaration
+    def parse_func_decl(self, func_token):
         
         # Use the actual function name token
-        func_decl = AST.AST(func_name_token)
+        func_decl = AST.AST(func_token)
 
         self.match(TokenType.LEFT_PAREN)
+        if self.lookahead.type != TokenType.RIGHT_PAREN:
+            self.parse_params(func_token.value)
         self.match(TokenType.RIGHT_PAREN)
 
         self.match(TokenType.LEFT_BRACE)
 
         # Parse function body with the scope set as function name
-        func_decl.add_child(self.parse_stmt_list(func_name))
+        func_decl.add_child(self.parse_stmt_list(func_token.value))
 
         self.match(TokenType.RIGHT_BRACE)
 
         return func_decl
+
+    # Parses function parameters
+    def parse_params(self, scope):
+
+        type = self.lookahead.value
+        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
+            raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
+        self.match(self.lookahead.type)
+        arg_token = self.lookahead
+        self.match(TokenType.IDENTIFIER)
+        self.symbol_table.add_symbol(arg_token.value, type, scope, "variable")
+
+        if self.lookahead.type == TokenType.COMMA:
+            self.match(TokenType.COMMA)
+            self.parse_params(scope)
+        else:
+            return
 
     # Parses a list of statements
     def parse_stmt_list(self, scope):
@@ -105,7 +126,7 @@ class Parser:
         elif self.lookahead.type == TokenType.FOR:
             return self.parse_for_stmt(scope)
         elif self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
-            return self.parse_var_decl(scope)
+            return self.parse_decl(scope)
         elif self.lookahead.type == TokenType.IDENTIFIER:
             return self.parse_expr_stmt(scope)
         else:
@@ -153,19 +174,7 @@ class Parser:
         pass
 
     # Parses a variable declaration
-    def parse_var_decl(self, scope):
-        # type var_name = expr; | type var_name;
-
-        # Get variable type and validate it
-        variable_type = self.lookahead.value
-        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
-            raise ParsingError(f"Unexpected variable type {variable_type}", self.lookahead.line, self.lookahead.column)
-        self.match(self.lookahead.type)
-
-        # Get variable name and add to symbol table
-        variable_name = self.lookahead
-        self.match(TokenType.IDENTIFIER)
-        self.symbol_table.add_symbol(variable_name.value, variable_type, scope, "variable")
+    def parse_var_decl(self, scope, variable_name, variable_type):
 
         # Check for optional initialization
         if self.lookahead.type == TokenType.ASSIGN:
@@ -203,12 +212,13 @@ class Parser:
         self.match(TokenType.RETURN)
         return_stmt = AST.AST(return_token)
 
-        # Get the return type from the symbol table
-        return_type = self.symbol_table.lookup(scope, "global")
+        # Get the return type from the symbol table 
+        return_type = self.symbol_table.lookup(self.lookahead.value, scope)
 
         # Parse the expression part of return 
         return_stmt.add_child(self.parse_bool_expr(scope, return_type.type))
         self.match(TokenType.SEMICOLON)
+     
         return return_stmt
     
     # Parses a boolean expression
@@ -285,7 +295,14 @@ class Parser:
             float_token = self.lookahead
             self.match(TokenType.FLOATING_NUMBER)
             return AST.AST(float_token)
-
+        
+        # Chars
+        elif self.lookahead.type == TokenType.CHARACTER:
+            if type != "char" and type != "bool":
+                raise ParsingError(f"Cannot convert {type} to char", self.lookahead.line, self.lookahead.column)
+            char_token = self.lookahead
+            self.match(TokenType.CHARACTER)
+            return AST.AST(char_token)
 
     # Parses etail for right side of expressions
     def parse_etail(self, scope, left, type):
