@@ -1,3 +1,4 @@
+// Short lexer test
 int main() {
     int i;
     printf("For loop test:\n");

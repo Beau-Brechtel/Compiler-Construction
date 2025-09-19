@@ -8,6 +8,7 @@ class TokenType(Enum):
 
     # Literals
     NUMBER = "NUMBER"
+    FLOATING_NUMBER = "FLOATING_NUMBER"
     STRING = "STRING"
     IDENTIFIER = "IDENTIFIER"
     INVALID_IDENTIFIER = "INVALID_IDENTIFIER"
@@ -24,7 +25,8 @@ class TokenType(Enum):
     INT = "INT"
     FLOAT = "FLOAT"
     CHAR = "CHAR"
-    DOUBLE = "DOUBLE"
+    BOOL = "BOOL"
+    VOID = "VOID"
 
     # Operators
     PLUS = "PLUS"
@@ -50,6 +52,7 @@ class TokenType(Enum):
     # Other
     WHITESPACE = "WHITESPACE"
     UNKNOWN = "UNKNOWN"
+    PARSING_TOKEN = "PARSING_TOKEN"  
 
 
 class Token:
@@ -61,7 +64,10 @@ class Token:
     
     def __str__(self) -> str:
         # String print out
+        if self.type == TokenType.PARSING_TOKEN:
+            return f""
         return f"{self.type.value}: {self.value}, At line {self.line}, column {self.column}"
+    
 
 
 class Lexer:
@@ -81,13 +87,14 @@ class Lexer:
             (r'\bint\b', TokenType.INT),
             (r'\bfloat\b', TokenType.FLOAT),
             (r'\bchar\b', TokenType.CHAR),
-            (r'\bdouble\b', TokenType.DOUBLE),
+            (r'\bbool\b', TokenType.BOOL),
+            (r'\bvoid\b', TokenType.VOID),
 
             # Invalid identifiers
             (r'\d+[a-zA-Z_][a-zA-Z0-9_]*', TokenType.INVALID_IDENTIFIER),
             
             # Numbers
-            (r'\d+\.\d+', TokenType.NUMBER),  
+            (r'\d+\.\d+', TokenType.FLOATING_NUMBER),  
             (r'\d+', TokenType.NUMBER),       
             
             # Identifiers

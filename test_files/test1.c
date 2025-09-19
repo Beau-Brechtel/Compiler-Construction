@@ -1,10 +1,12 @@
-// Short lexer test
 int main() {
     int x = 10;
-    float y = 3.14;
+    int y = 20;
 
-    if (x != 0) y = y / x;
-    else y = y * 2;
+    if (x > 0.5) {
+        y = y + 5;
+    } else if (x < 0.5) {
+        y = y * 2;
+    }
 
-    return (int) y;
+    return y;
 }
