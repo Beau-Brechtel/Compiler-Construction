@@ -1,9 +1,9 @@
 // Short lexer test
 int main() {
     int i;
-    printf("For loop test:\n");
-    for (i = 0; i < 5; i++) {
-        printf("Iteration %d\n", i);
+    int x = 0;
+    for (i = 0; i < 5; i = i + 1) {
+        x = x + 2;
     }
-    return 0;
+    return x;
 }

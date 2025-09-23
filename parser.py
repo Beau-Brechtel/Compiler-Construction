@@ -131,7 +131,9 @@ class Parser:
         elif self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
             return self.parse_decl(scope)
         elif self.lookahead.type == TokenType.IDENTIFIER:
-            return self.parse_expr_stmt(scope)
+            expression = self.parse_expr_stmt(scope)
+            self.match(TokenType.SEMICOLON)
+            return expression
         else:
             raise ParsingError(f"Unexpected token {self.lookahead.value} in statement", self.lookahead.line, self.lookahead.column)
 
@@ -148,6 +150,7 @@ class Parser:
         if_stmt.add_child(self.parse_bool_expr(scope, "bool"))  
         self.match(TokenType.RIGHT_PAREN)
 
+        # Match statement block
         self.match(TokenType.LEFT_BRACE)
         if_stmt.add_child(self.parse_stmt_list(scope))
         self.match(TokenType.RIGHT_BRACE)
@@ -169,12 +172,56 @@ class Parser:
             if_stmt_list.add_child(else_stmt)
 
         return if_stmt_list
-
+    # Parses a while statement
     def parse_while_stmt(self, scope):
-        pass
+        # Match token and create AST node
+        while_stmt = (AST.AST(self.lookahead))
+        self.match(TokenType.WHILE)
+
+        # Match boolean expression
+        self.match(TokenType.LEFT_PAREN)
+        while_stmt.add_child(self.parse_bool_expr(scope, "bool"))
+        self.match(TokenType.RIGHT_PAREN)
+
+        # Match statement block
+        self.match(TokenType.LEFT_BRACE)
+        while_stmt.add_child(self.parse_stmt_list(scope))
+        self.match(TokenType.RIGHT_BRACE)
+
+        return while_stmt
+
 
     def parse_for_stmt(self, scope):
-        pass
+        # Match token and create AST node
+        for_stmt = (AST.AST(self.lookahead))
+        self.match(TokenType.FOR)
+
+        # Match initalization
+        self.match(TokenType.LEFT_PAREN)
+        if self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
+            init_decl = self.parse_decl(scope)
+            for_stmt.add_child(init_decl)
+        else:
+            init_expr = self.parse_expr_stmt(scope)
+            self.match(TokenType.SEMICOLON)
+            for_stmt.add_child(init_expr)
+
+        # Match boolean expression
+        bool_expr = self.parse_bool_expr(scope, "bool")
+        for_stmt.add_child(bool_expr)
+        self.match(TokenType.SEMICOLON)
+
+        # Match iteration expression
+        iter_expr = self.parse_expr_stmt(scope)
+        for_stmt.add_child(iter_expr)
+        self.match(TokenType.RIGHT_PAREN)
+
+        # Match statement block
+        self.match(TokenType.LEFT_BRACE)
+        for_stmt.add_child(self.parse_stmt_list(scope))
+        self.match(TokenType.RIGHT_BRACE)
+
+        return for_stmt
 
     # Parses a variable declaration
     def parse_var_decl(self, scope, variable_name, variable_type):
@@ -205,7 +252,6 @@ class Parser:
         variable_type = valid.type  
         expr_stmt.add_child(AST.AST(identifier_token))
         expr_stmt.add_child(self.parse_bool_expr(scope, variable_type))
-        self.match(TokenType.SEMICOLON)
         return expr_stmt
 
     # Parses a return statement

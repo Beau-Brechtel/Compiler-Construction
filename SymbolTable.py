@@ -1,6 +1,6 @@
 # https://matthewmacfarquhar.medium.com/build-your-own-programming-language-part-4-the-symbol-table-69f47ea394ad 
 # Somewhat based symbol table off this but tried to simplify it
-# Basically just a dictionary with more stuff
+# Basically just a dictionary of dictionaries with some ease of use things
 
 class symbol_table:
     def __init__(self):

@@ -5,13 +5,14 @@ Design Document
 Work In Progress Grammar
 
             program         -> func_decl_list 
+            decl            -> type Identifier func_decl | type Identifier var_decl
             func_decl_list  -> func_decl | func_decl_list func_decl 
-            func_decl       -> type IDENTIFIER () { stmt_list } ;
+            func_decl       -> (params) { stmt_list } ;
             stmt_list       -> stmt | stmt_list stmt 
-            stmt            -> return_stmt | var_decl | assignment | if_stmt| while_stmt | for_stmt
+            stmt            -> return_stmt | var_decl | assignment | if_stmt| while_stmt | for_stmt | expr_stmt ;
             return_stmt     -> "return" Expression ;
-            var_decl        -> type IDENTIFIER = Expression ; | type IDENTIFIER ;
-            expr_stmt       -> IDENTIFIER = Expression ;
+            var_decl        -> = Expression ; | ;
+            expr_stmt       -> IDENTIFIER = Expression 
             if_stmt         -> if ( Expression )  { stmt_list } | if ( Expression ) { stmt_list } else { stmt_list } ;
             while_stmt      -> while ( Expression ) { stmt_list } ;
             for_stmt        -> for (  var_decl | assignment ; Expression ; assignment ) { stmt_list } ;
@@ -21,7 +22,8 @@ Work In Progress Grammar
             etail           -> + term etail | - term etail | nothing
             term            -> factor ttail
             ttail           -> * factor ttail | / factor ttail | nothing
-            factor          -> ( expression ) | NUM | ID 
+            factor          -> ( expression ) | NUM | ID | func_call
+            func_call       -> ID(args)
 
 
 Errors:
@@ -62,7 +64,6 @@ Lexer
 Parser 
     - Looked back at COMP 3220 parser for inspiration
     - https://supunsetunga.medium.com/writing-a-parser-getting-started-44ba70bb6cc9 
-    - For now a program has to start with a function with nothing before it so no variable declarations or anything
     - Using my ast structure I bascially just follow my grammar adding ast nodes as I match up correct syntax
     - Very strict on type checking, no conversions so if something is an int everything that makes it up needs to be an int
     - As of now when dealing with boolean expressions types arent as strict
