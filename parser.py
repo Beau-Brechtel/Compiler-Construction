@@ -28,12 +28,10 @@ class Parser:
 
     # Main parse function that starts the parsing process
     def parse(self, tokens):
-        print(f"DEBUG: Starting parse with {len(tokens)} tokens")
         self.tokens = tokens
         
         # Initialize lookahead token
         self.consume()
-        print(f"DEBUG: First token: {self.lookahead}")
 
         # Create root of AST 
         program_token = Token(TokenType.PARSING_TOKEN, "Program", None, None)
@@ -41,43 +39,32 @@ class Parser:
 
         # Start looping through tokens and building AST
         while self.lookahead is not None:
-            print(f"DEBUG: Processing token: {self.lookahead}")
             try:
                 decl = self.parse_decl()
                 if decl is not None:
                     program_root.add_child(decl)
-                    print(f"DEBUG: Successfully parsed declaration")
-                else:
-                    print(f"DEBUG: parse_decl returned None")
             except Exception as e:
-                print(f"DEBUG: Exception in parse loop: {e}")
                 raise
 
-        print(f"DEBUG: Parse completed successfully")
         # Return AST tree and symbol table
         return program_root, self.symbol_table
 
     def parse_decl(self, scope = "global"):
-        print(f"DEBUG: parse_decl() called with token: {self.lookahead}")
         type = self.lookahead.value
         if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL, TokenType.VOID]:
             raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
-        print(f"DEBUG: Matched type '{type}', now at token: {self.lookahead}")
 
         # Get function/variable name
         token = self.lookahead 
         if self.lookahead.type not in [TokenType.IDENTIFIER, TokenType.MAIN]:
             raise ParsingError(f"Expected name but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
-        print(f"DEBUG: Matched name '{token.value}', now at token: {self.lookahead}")
 
         if self.lookahead.type == TokenType.LEFT_PAREN:
-            print(f"DEBUG: Found LEFT_PAREN, parsing function declaration")
             self.symbol_table.add_symbol(token.value, type, scope, "function")
             return self.parse_func_decl(token)
         else:
-            print(f"DEBUG: No LEFT_PAREN, parsing variable declaration")
             self.symbol_table.add_symbol(token.value, type, scope, "variable")
             return self.parse_var_decl(scope, token, type)
 

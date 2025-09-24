@@ -10,7 +10,7 @@ from Errors import ParsingError
 
 # Sets up and runs the lexer
 # input: source code as string
-def run_lexer(source_code, print_tokens=True):
+def run_lexer(source_code):
     
     # Tries to run lexer
     try:
@@ -19,12 +19,6 @@ def run_lexer(source_code, print_tokens=True):
         # Returns list of token objects
         my_lexer = lexer.Lexer()
         tokens = my_lexer.tokenize(source_code)
-
-        # Output tokens
-        if print_tokens:
-            print("Tokens:")
-            for token in tokens:
-                print(token)
         
         return tokens
     
@@ -40,7 +34,7 @@ def run_lexer(source_code, print_tokens=True):
 
 # Set up and run the parser
 # input: list of tokens
-def run_parser(tokens, print_AST=True):
+def run_parser(tokens):
 
     try:
 
@@ -49,13 +43,7 @@ def run_parser(tokens, print_AST=True):
         my_parser = parser.Parser()
         AST, my_symbol_table = my_parser.parse(tokens)
 
-        if print_AST:
-            print("AST:")
-            AST.print_tree()
-            print()
-            my_symbol_table.print_table()
-
-        return AST
+        return AST, my_symbol_table
 
     # Handle parsing errors
     except ParsingError as e:
@@ -74,8 +62,8 @@ def main():
     # Command-line arguments for actually running the compiler
     arg_parser = argparse.ArgumentParser(description='Compiler for Beau\'s C language')
     arg_parser.add_argument('input_file', help='Input source code file')
-    arg_parser.add_argument('-l', '--lexer', action='store_true', help='Run lexer and print tokens')
-    arg_parser.add_argument('-p', '--parser', action='store_true', help='Run parser (not implemented yet)')
+    arg_parser.add_argument('-l', '--lexer', action='store_true', help='Print lexer output tokens')
+    arg_parser.add_argument('-p', '--parser', action='store_true', help='Print parser output AST and symbol table')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -88,22 +76,31 @@ def main():
         source_code = f.read()
 
     # Run lexer
+    tokens = run_lexer(source_code)
+    if tokens == None:
+        sys.exit(1)
     if args.lexer:
         print(f"Running lexer on: {args.input_file}")
-        tokens = run_lexer(source_code)
-        if tokens == None:
-            sys.exit(1)
+        print("Tokens:")
+        for token in tokens:
+            print(token)
+        print()
+
+
 
     # Run parser
+    AST, my_symbol_table = run_parser(tokens)
+    if AST == None:
+        sys.exit(1)
     if args.parser:
-        tokens = run_lexer(source_code, False)
-        if tokens == None:
-            sys.exit(1)
-
         print("Running parser on output tokens")
-        AST = run_parser(tokens)
-        if AST == None:
-            sys.exit(1)
+        print("AST:")
+        AST.print_tree()
+        print()
+        print("Symbol Table:")
+        print()
+        my_symbol_table.print_table()
+        print()
 
 
 if __name__ == "__main__":
