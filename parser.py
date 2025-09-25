@@ -50,6 +50,7 @@ class Parser:
         return program_root, self.symbol_table
 
     def parse_decl(self, scope = "global"):
+        # Get type of function/variable
         type = self.lookahead.value
         if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL, TokenType.VOID]:
             raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
@@ -61,6 +62,7 @@ class Parser:
             raise ParsingError(f"Expected name but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
 
+        # Determine if its a function or variable declaration
         if self.lookahead.type == TokenType.LEFT_PAREN:
             self.symbol_table.add_symbol(token.value, type, scope, "function")
             return self.parse_func_decl(token)
@@ -73,14 +75,14 @@ class Parser:
         # Use the actual function name token
         func_decl = AST.AST(func_token)
 
+        # Match the parameter list
         self.match(TokenType.LEFT_PAREN)
         if self.lookahead.type != TokenType.RIGHT_PAREN:
             self.parse_params(func_token.value)
         self.match(TokenType.RIGHT_PAREN)
 
+        # Match the function body
         self.match(TokenType.LEFT_BRACE)
-
-        # Parse function body with the scope set as function name
         func_decl.add_child(self.parse_stmt_list(func_token.value))
 
         self.match(TokenType.RIGHT_BRACE)
@@ -90,10 +92,13 @@ class Parser:
     # Parses function parameters
     def parse_params(self, scope):
 
+        # Get the type of the parameter
         type = self.lookahead.value
         if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
             raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
+
+        # Get the name of the parameter
         arg_token = self.lookahead
         self.match(TokenType.IDENTIFIER)
         self.symbol_table.add_symbol(arg_token.value, type, scope, "parameter")
@@ -271,6 +276,7 @@ class Parser:
     
     # Parses a boolean expression
     def parse_bool_expr(self, scope, type):
+
         left = self.parse_expr(scope, type)
         if self.lookahead.type in [TokenType.EQUAL, TokenType.NOT_EQUAL, TokenType.LESS_THAN, TokenType.GREATER_THAN]:
             bool_operator = AST.AST(self.lookahead)

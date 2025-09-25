@@ -97,7 +97,7 @@ def main():
     if args.parser:
         print("Running parser on output tokens")
         print("AST:")
-        AST.print_tree()
+        AST.print_tree()#
         print()
         print("Symbol Table:")
         print()
@@ -105,13 +105,13 @@ def main():
         print()
 
     # Run TAC generation
-    Three_Address_Code = TAC.TAC()
-    Three_Address_Code.generate_TAC(AST)
+    #Three_Address_Code = TAC.TAC()
+    #Three_Address_Code.generate_TAC(AST)
     if args.tac:
         print("Three Address Code (TAC):")
-        for instr in Three_Address_Code.get_instructions():
-            print(instr)
-        print()
+        #for instr in Three_Address_Code.instructions:
+        #    print(instr)
+        #print()
 
 
 if __name__ == "__main__":
