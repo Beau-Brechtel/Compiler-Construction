@@ -3,6 +3,7 @@ import os
 import argparse
 import lexer
 import parser
+import TAC
 import AST
 import SymbolTable
 from Errors import LexerError
@@ -64,6 +65,7 @@ def main():
     arg_parser.add_argument('input_file', help='Input source code file')
     arg_parser.add_argument('-l', '--lexer', action='store_true', help='Print lexer output tokens')
     arg_parser.add_argument('-p', '--parser', action='store_true', help='Print parser output AST and symbol table')
+    arg_parser.add_argument('-t', '--tac', action='store_true', help='Print TAC output')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -100,6 +102,15 @@ def main():
         print("Symbol Table:")
         print()
         my_symbol_table.print_table()
+        print()
+
+    # Run TAC generation
+    Three_Address_Code = TAC.TAC()
+    Three_Address_Code.generate_TAC(AST)
+    if args.tac:
+        print("Three Address Code (TAC):")
+        for instr in Three_Address_Code.get_instructions():
+            print(instr)
         print()
 
 
