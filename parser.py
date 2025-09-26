@@ -52,7 +52,7 @@ class Parser:
     def parse_decl(self, scope = "global"):
         # Get type of function/variable
         type = self.lookahead.value
-        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL, TokenType.VOID]:
+        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.VOID]:
             raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
 
@@ -94,7 +94,7 @@ class Parser:
 
         # Get the type of the parameter
         type = self.lookahead.value
-        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
+        if self.lookahead.type not in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR]:
             raise ParsingError(f"Unexpected type {type}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
 
@@ -132,14 +132,37 @@ class Parser:
             return self.parse_while_stmt(scope)
         elif self.lookahead.type == TokenType.FOR:
             return self.parse_for_stmt(scope)
-        elif self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
+        elif self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR]:
             return self.parse_decl(scope)
         elif self.lookahead.type == TokenType.IDENTIFIER:
-            expression = self.parse_expr_stmt(scope)
-            self.match(TokenType.SEMICOLON)
-            return expression
+            valid = self.symbol_table.lookup(self.lookahead.value, scope)
+            if valid.kind == "function":
+                function_identifier = self.lookahead
+                self.match(TokenType.IDENTIFIER)
+                func_call = self.func_call(function_identifier, scope)
+                self.match(TokenType.SEMICOLON)
+                return func_call
+            else:
+                expression = self.parse_expr_stmt(scope)
+                self.match(TokenType.SEMICOLON)
+                return expression
         else:
             raise ParsingError(f"Unexpected token {self.lookahead.value} in statement", self.lookahead.line, self.lookahead.column)
+
+    # Determines the type of the next token for boolean expressions
+    def get_next_type_for_boolean(self, scope):
+        if self.lookahead.type == TokenType.NUMBER:
+            return "int"
+        elif self.lookahead.type == TokenType.FLOATING_NUMBER:
+            return "float"
+        elif self.lookahead.type == TokenType.CHARACTER:
+            return "char"
+        elif self.lookahead.type == TokenType.IDENTIFIER:
+            valid = self.symbol_table.lookup(self.lookahead.value, scope)
+            if valid is not None:
+                return valid.type
+            else:
+                raise ParsingError(f"Undeclared variable {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
 
     # Parses an if statement
     def parse_IF_stmt(self, scope):
@@ -151,7 +174,8 @@ class Parser:
 
         # Match boolean expression
         self.match(TokenType.LEFT_PAREN)
-        if_stmt.add_child(self.parse_bool_expr(scope, "bool"))  
+        type = self.get_next_type_for_boolean(scope)
+        if_stmt.add_child(self.parse_bool_expr(scope, type))
         self.match(TokenType.RIGHT_PAREN)
 
         # Match statement block
@@ -184,7 +208,8 @@ class Parser:
 
         # Match boolean expression
         self.match(TokenType.LEFT_PAREN)
-        while_stmt.add_child(self.parse_bool_expr(scope, "bool"))
+        type = self.get_next_type_for_boolean(scope)
+        while_stmt.add_child(self.parse_bool_expr(scope, type))
         self.match(TokenType.RIGHT_PAREN)
 
         # Match statement block
@@ -194,7 +219,7 @@ class Parser:
 
         return while_stmt
 
-
+    # Parses a for statement
     def parse_for_stmt(self, scope):
         # Match token and create AST node
         for_stmt = (AST.AST(self.lookahead))
@@ -202,7 +227,7 @@ class Parser:
 
         # Match initalization
         self.match(TokenType.LEFT_PAREN)
-        if self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR, TokenType.BOOL]:
+        if self.lookahead.type in [TokenType.INT, TokenType.FLOAT, TokenType.CHAR]:
             init_decl = self.parse_decl(scope)
             for_stmt.add_child(init_decl)
         else:
@@ -211,7 +236,8 @@ class Parser:
             for_stmt.add_child(init_expr)
 
         # Match boolean expression
-        bool_expr = self.parse_bool_expr(scope, "bool")
+        type = self.get_next_type_for_boolean(scope)
+        bool_expr = self.parse_bool_expr(scope, type)
         for_stmt.add_child(bool_expr)
         self.match(TokenType.SEMICOLON)
 
@@ -287,9 +313,6 @@ class Parser:
             bool_operator.add_child(right)
             return bool_operator
         else:
-            if type == "bool":
-                raise ParsingError(f"Expected boolean operator but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
-            else:
                 return left
 
     # Parses an expression
@@ -325,7 +348,7 @@ class Parser:
             return expr
         # Ints
         elif self.lookahead.type == TokenType.NUMBER:
-            if type != "int" and type != "bool":
+            if type != "int":
                 raise ParsingError(f"Cannot convert {type} to int", self.lookahead.line, self.lookahead.column)
             number_token = self.lookahead
             self.match(TokenType.NUMBER)
@@ -336,19 +359,19 @@ class Parser:
             self.match(TokenType.IDENTIFIER)
             valid = self.symbol_table.lookup(identifier_token.value, scope)
 
-            if (valid is not None and valid.kind == "function") and (valid.type == type or type == "bool"):
+            if (valid is not None and valid.kind == "function") and (valid.type == type):
                 # Function call
                 return self.func_call(identifier_token, scope)
             else:
                 # make sure variable or function is declared and types match
                 if valid is None :
                     raise ParsingError(f"Undeclared variable {identifier_token.value}", identifier_token.line, identifier_token.column)
-                elif valid.type != type and type != "bool":
+                elif valid.type != type:
                     raise ParsingError(f"Type mismatch: expected {type} but found {valid.type}", identifier_token.line, identifier_token.column)
                 return AST.AST(identifier_token)
         # Floats
         elif self.lookahead.type == TokenType.FLOATING_NUMBER:
-            if type != "float" and type != "bool":
+            if type != "float":
                 raise ParsingError(f"Cannot convert {type} to float", self.lookahead.line, self.lookahead.column)
             float_token = self.lookahead
             self.match(TokenType.FLOATING_NUMBER)
@@ -356,7 +379,7 @@ class Parser:
         
         # Chars
         elif self.lookahead.type == TokenType.CHARACTER:
-            if type != "char" and type != "bool":
+            if type != "char":
                 raise ParsingError(f"Cannot convert {type} to char", self.lookahead.line, self.lookahead.column)
             char_token = self.lookahead
             self.match(TokenType.CHARACTER)

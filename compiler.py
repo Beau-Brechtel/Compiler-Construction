@@ -91,9 +91,10 @@ def main():
 
 
     # Run parser
-    AST, my_symbol_table = run_parser(tokens)
-    if AST == None:
+    parser_result = run_parser(tokens)
+    if parser_result == None:
         sys.exit(1)
+    AST, my_symbol_table = parser_result
     if args.parser:
         print("Running parser on output tokens")
         print("AST:")

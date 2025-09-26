@@ -26,7 +26,6 @@ class TokenType(Enum):
     INT = "INT"
     FLOAT = "FLOAT"
     CHAR = "CHAR"
-    BOOL = "BOOL"
     VOID = "VOID"
 
     # Operators
@@ -88,7 +87,6 @@ class Lexer:
             (r'\bint\b', TokenType.INT),
             (r'\bfloat\b', TokenType.FLOAT),
             (r'\bchar\b', TokenType.CHAR),
-            (r'\bbool\b', TokenType.BOOL),
             (r'\bvoid\b', TokenType.VOID),
 
             # Invalid identifiers

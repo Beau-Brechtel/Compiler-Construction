@@ -10,6 +10,7 @@ int add(int a, int b) {
 int main() {
     int localVar = 5;
     int result = add(localVar, globalVar);
+    add(3, 4);
 
     return localVar + globalVar;
 }

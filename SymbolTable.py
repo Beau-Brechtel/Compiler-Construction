@@ -26,7 +26,7 @@ class symbol_table:
     def get_function_params(self, function_name):
         params = []
         if function_name in self.scopes:
-            for symbol_name, symbol_entry in self.scopes[function_name].items():
+            for symbol_entry in self.scopes[function_name].values():
                 if symbol_entry.kind == "parameter":
                     params.append(symbol_entry)
         return params if params else None
@@ -39,7 +39,7 @@ class symbol_table:
             
         for scope_name, scope_symbols in self.scopes.items():
             print(f"Scope: {scope_name}")
-            for symbol_name, symbol_entry in scope_symbols.items():
+            for symbol_entry in scope_symbols.values():
                 print(f"  {symbol_entry}")
             print()
 
