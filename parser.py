@@ -58,7 +58,7 @@ class Parser:
 
         # Get function/variable name
         token = self.lookahead 
-        if self.lookahead.type not in [TokenType.IDENTIFIER, TokenType.MAIN]:
+        if self.lookahead.type != TokenType.IDENTIFIER:
             raise ParsingError(f"Expected name but found {self.lookahead.value}", self.lookahead.line, self.lookahead.column)
         self.match(self.lookahead.type)
 

@@ -20,7 +20,6 @@ class TokenType(Enum):
     WHILE = "WHILE"
     FOR = "FOR"
     RETURN = "RETURN"
-    MAIN = "MAIN"
 
     # Keywords - data types
     INT = "INT"
@@ -83,7 +82,6 @@ class Lexer:
             (r'\bwhile\b', TokenType.WHILE),
             (r'\bfor\b', TokenType.FOR),
             (r'\breturn\b', TokenType.RETURN),
-            (r'\bmain\b', TokenType.MAIN),
             (r'\bint\b', TokenType.INT),
             (r'\bfloat\b', TokenType.FLOAT),
             (r'\bchar\b', TokenType.CHAR),
