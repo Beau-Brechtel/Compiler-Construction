@@ -106,13 +106,14 @@ def main():
         print()
 
     # Run TAC generation
-    #Three_Address_Code = TAC.TAC()
-    #Three_Address_Code.generate_TAC(AST)
+    Three_Address_Code = TAC.TAC(my_symbol_table)
+    Three_Address_Code.generate_TAC(AST)
     if args.tac:
         print("Three Address Code (TAC):")
-        #for instr in Three_Address_Code.instructions:
-        #    print(instr)
-        #print()
+        for instr in Three_Address_Code.instructions:
+            #print(instr)
+            print(instr.to_string_simple())
+        print()
 
 
 if __name__ == "__main__":

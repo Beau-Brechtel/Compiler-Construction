@@ -11,7 +11,7 @@ class Instruction:
     def __str__(self):
         parts = []
         if self.label is not None:
-            parts.append(f"{self.label}:")
+            parts.append(f"\n{self.label}:")
             
         if self.result is not None and self.operator == '=':
             parts.append(f"{self.result} = {self.arg1}")
@@ -30,4 +30,9 @@ class Instruction:
                 parts.append(f"{self.arg2}")
         
         return ' '.join(parts)
+    
+    def to_string_simple(self):
+        """Simple string representation showing all components with labels and None values"""
+        return (f"label:{self.label} operator:{self.operator} "
+                f"arg1:{self.arg1} arg2:{self.arg2} result:{self.result}\n")
     
