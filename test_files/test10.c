@@ -1,7 +1,7 @@
 // Parser , Should cause Type error
-float main() {
+int main() {
     int x = 5;
     int y = 3;
-    int z = x + y; // int + float
+    int z = x + y; 
     return z;
 }

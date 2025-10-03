@@ -13,21 +13,28 @@ class Instruction:
         if self.label is not None:
             parts.append(f"\n{self.label}:")
             
-        if self.result is not None and self.operator == '=':
+        if self.operator == 'if':
+            parts.append(f"if {self.arg1} goto {self.arg2} else goto {self.result}")
+        elif self.operator == 'goto':
+            parts.append(f"goto {self.result}")
+        elif self.result is not None and self.operator == '=':
             parts.append(f"{self.result} = {self.arg1}")
-        elif self.result is not None and self.arg1 is not None and self.arg2 is not None:
+        elif self.result is not None and self.arg1 is not None and self.arg2 is not None and self.operator is not None:
             parts.append(f"{self.result} = {self.arg1} {self.operator} {self.arg2}")
         elif self.operator == 'return':
             parts.append(f"return {self.arg1}")
-        else:
+        elif self.operator is not None or self.result is not None or self.arg1 is not None or self.arg2 is not None:
+            # Fallback for any other instruction types
+            instruction_parts = []
             if self.result is not None:
-                parts.append(f"{self.result}")
+                instruction_parts.append(f"{self.result}")
             if self.arg1 is not None:
-                parts.append(f"{self.arg1}")
+                instruction_parts.append(f"{self.arg1}")
             if self.operator is not None:
-                parts.append(f"{self.operator}")
+                instruction_parts.append(f"{self.operator}")
             if self.arg2 is not None:
-                parts.append(f"{self.arg2}")
+                instruction_parts.append(f"{self.arg2}")
+            parts.append(' '.join(instruction_parts))
         
         return ' '.join(parts)
     

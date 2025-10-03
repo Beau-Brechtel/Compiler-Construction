@@ -111,8 +111,8 @@ def main():
     if args.tac:
         print("Three Address Code (TAC):")
         for instr in Three_Address_Code.instructions:
-            #print(instr)
-            print(instr.to_string_simple())
+            print(instr)
+            #print(instr.to_string_simple())
         print()
 
 
