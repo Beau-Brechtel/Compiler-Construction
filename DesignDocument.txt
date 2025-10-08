@@ -70,7 +70,6 @@ Parser
     - https://supunsetunga.medium.com/writing-a-parser-getting-started-44ba70bb6cc9 
     - Using my ast structure I bascially just follow my grammar adding ast nodes as I match up correct syntax
     - Very strict on type checking, no conversions so if something is an int everything that makes it up needs to be an int
-    - As of now when dealing with boolean expressions types arent as strict
 
 AST.py
     - Abstract syntax tree object based off the AST given in the COMP 3220 assignments
@@ -85,5 +84,16 @@ Instruction.py
 TAC.py  
     - Converts AST to three address code
     - https://stackoverflow.com/questions/23769041/translate-ast-to-three-address-code
-        - Took idea from here about a function that generates fresh temp variables
+        - Took idea from here about a function that generates fresh temp variables and labels
+    - Right now every expression gets set to a temp variable but I think I'm going to try and fix this in the optimizations part
     
+ConstantFoldingOptimization.py
+    - Does Constant Folding Optimization
+
+TempVarRemoverOptimization.py
+    - Removes unnecessary temp variables 
+    - Example
+        t1 = 1 + 2
+        x = t1
+        This would just become
+        x = 1 + 2
