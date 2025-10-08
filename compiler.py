@@ -9,6 +9,7 @@ import SymbolTable
 from Errors import LexerError
 from Errors import ParsingError
 import constantFoldingOptimization
+import tempVariableRemoverOptimization
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -114,7 +115,6 @@ def main():
         print("Three Address Code (TAC):")
         for instr in Three_Address_Code.instructions:
             print(instr)
-            #print(instr.to_string_simple())
         print()
 
     # Run optimizations if enabled
@@ -122,10 +122,11 @@ def main():
         print("Running optimization 1 on TAC")
         CF = constantFoldingOptimization.ConstantFoldingOptimization(Three_Address_Code.instructions)
         optimized_instructions = CF.optimize()
+        tVR = tempVariableRemoverOptimization.tempVarRemover(optimized_instructions)
+        optimized_instructions = tVR.optimize()
         print("Three Address Code (TAC):")
         for instr in optimized_instructions:
             print(instr)
-            #print(instr.to_string_simple())
         print()
 
 if __name__ == "__main__":

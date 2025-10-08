@@ -18,7 +18,6 @@ class ConstantFoldingOptimization:
         return False
     
     def get_numeric_value(self, value):
-        print(value)
         if isinstance(value, (int, float)):
             return value
         if isinstance(value, str):

@@ -1,5 +1,5 @@
 // Parser Test 
 int main () {
-    int x = 5;
+    int x = 5 + 2;
     return x;
 }
