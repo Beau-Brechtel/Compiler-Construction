@@ -8,6 +8,7 @@ import AST
 import SymbolTable
 from Errors import LexerError
 from Errors import ParsingError
+import constantFoldingOptimization
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -66,6 +67,7 @@ def main():
     arg_parser.add_argument('-l', '--lexer', action='store_true', help='Print lexer output tokens')
     arg_parser.add_argument('-p', '--parser', action='store_true', help='Print parser output AST and symbol table')
     arg_parser.add_argument('-t', '--tac', action='store_true', help='Print TAC output')
+    arg_parser.add_argument('-o1', '--opt1', action='store_true', help='Enable optimization 1')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -115,6 +117,16 @@ def main():
             #print(instr.to_string_simple())
         print()
 
+    # Run optimizations if enabled
+    if args.opt1:
+        print("Running optimization 1 on TAC")
+        CF = constantFoldingOptimization.ConstantFoldingOptimization(Three_Address_Code.instructions)
+        optimized_instructions = CF.optimize()
+        print("Three Address Code (TAC):")
+        for instr in optimized_instructions:
+            print(instr)
+            #print(instr.to_string_simple())
+        print()
 
 if __name__ == "__main__":
     main()
