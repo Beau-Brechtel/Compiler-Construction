@@ -15,6 +15,8 @@ class Instruction:
             
         if self.operator == 'if':
             parts.append(f"if {self.arg1} goto {self.arg2} else goto {self.result}")
+        elif self.operator == 'call':
+            parts.append(f"{self.result} = {self.arg1}({self.arg2})")
         elif self.operator == 'goto':
             parts.append(f"goto {self.result}")
         elif self.result is not None and self.operator == '=':

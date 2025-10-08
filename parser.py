@@ -427,7 +427,7 @@ class Parser:
         if params is None:
             raise ParsingError(f"Function expects no arguments but arguments were provided", self.lookahead.line, self.lookahead.column)
 
-        argument_token = Token(TokenType.PARSING_TOKEN, "Arguments", None, None)
+        argument_token = Token(TokenType.PARSING_TOKEN, "Parameters", None, None)
         args = AST.AST(argument_token)
 
         for param in params:

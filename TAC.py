@@ -75,10 +75,15 @@ class TAC:
 
         # Handles function definitions
         if token_type == TokenType.IDENTIFIER and self.identifier_is_function(node.get_token().value, scope):
-            function_label = node.get_token().value
-            self.add_instruction(label=function_label)
-            self.generate_TAC(self.get_first_child(node), scope=function_label)
-            return None
+            first_child = self.get_first_child(node)
+    
+            if first_child and first_child.get_token().value == "Parameters":
+                return self.generate_TAC_for_function_call(node, scope)
+            else:
+                function_label = node.get_token().value
+                self.add_instruction(label=function_label)
+                self.generate_TAC(self.get_first_child(node), scope=function_label)
+                return None
 
         if token_type == TokenType.ASSIGN:
             return self.generate_TAC_for_assignment(node, scope)
@@ -209,3 +214,20 @@ class TAC:
         self.generate_TAC(increment_node, scope=scope)
         self.add_instruction(operator='goto', result=start_label)
         return end_label
+    
+    # Handles TAC Generation for function calls
+    def generate_TAC_for_function_call(self, node, scope):
+        parameter_head = self.get_first_child(node)
+        function_name = node.get_token().value
+        parameter_list = []
+
+        if parameter_head:
+            for child in self.children(parameter_head):
+                param_result = self.generate_TAC(child, scope=scope)
+                parameter_list.append(param_result)
+        
+        temp_var = self.generate_fresh_variable()
+        self.add_instruction(operator='call', arg1=function_name, arg2=','.join(parameter_list), result=temp_var)
+        return temp_var
+       
+
