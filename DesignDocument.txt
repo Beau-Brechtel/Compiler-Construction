@@ -38,6 +38,9 @@ Errors:
 Main:
     - Has a list of args that user can use when running compiler
     -l runs lexer and outputs tokens
+    -p runs parser and outputs AST and symbol table
+    -t runs three address code and outputs TAC
+    -o1 runs optimization 1 which is just constant folding and gets rid of some unnecessary temp variables 
     
 # Used Copilot in helping structure file as well as create regular expressions
 Lexer
