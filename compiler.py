@@ -72,6 +72,8 @@ def main():
     arg_parser.add_argument('-t', '--tac', action='store_true', help='Print TAC output')
     arg_parser.add_argument('-o1', '--opt1', action='store_true', help='Enable optimization 1')
     arg_parser.add_argument('-o2', '--opt2', action='store_true', help='Enable optimization 2')
+    arg_parser.add_argument('-c', '--candc', action='store_true', help='Enable constant and copy propagation optimization')
+    arg_parser.add_argument('-a', '--algebraic', action='store_true', help='Enable algebraic simplification optimization')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -147,10 +149,8 @@ def main():
             CP = candcPropagation.CandCPropagation(optimized_instructions)
             optimized_instructions = CP.optimize()
 
-            # Compare string representations
-            current_tac = [str(instr) for instr in optimized_instructions]
-            
             # Break if no changes were made
+            current_tac = [str(instr) for instr in optimized_instructions]
             if current_tac == previous_tac:
                 break
         
@@ -161,5 +161,24 @@ def main():
             print(instr)
         print()
 
+    if args.candc:
+        print("Running constant and copy propagation optimization on TAC")
+        CP = candcPropagation.CandCPropagation(Three_Address_Code.instructions)
+        optimized_instructions = CP.optimize()
+        print("Three Address Code (TAC):")
+        for instr in optimized_instructions:
+            print(instr)
+        print()
+
+    if args.algebraic:
+        print("Running algebraic simplification optimization on TAC")
+        ASO = algebraicSimplificationOptimization.AlgebraicSimplificationOptimization(Three_Address_Code.instructions)
+        optimized_instructions = ASO.optimize()
+        print("Three Address Code (TAC):")
+        for instr in optimized_instructions:
+            print(instr)
+        print()
+
+        
 if __name__ == "__main__":
     main()

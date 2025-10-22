@@ -38,8 +38,6 @@ class CandCPropagation:
                 else:
                     arg2 = instr.arg2
 
-                optimized_instructions.append(
-                    Instruction(operator=instr.operator, arg1=arg1, arg2=arg2, result=instr.result)
-                )
+                optimized_instructions.append(Instruction(operator=instr.operator, arg1=arg1, arg2=arg2, result=instr.result))
 
         return optimized_instructions
