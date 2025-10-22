@@ -10,22 +10,23 @@ class CandCPropagation:
 
         for instr in self.instructions:
             if instr.operator == '=' and instr.arg2 is None:
-                # Handle both constant and copy propagation
                 if instr.arg1 in constant_values:
-                    # Copy propagation: resolve the value and propagate it
+
                     new_value = constant_values[instr.arg1]
                     constant_values[instr.result] = new_value
-                    optimized_instructions.append(
-                        Instruction(operator='=', arg1=new_value, arg2=None, result=instr.result)
-                    )
+
+                    optimized_instructions.append(Instruction(operator='=', arg1=new_value, arg2=None, result=instr.result))
                 else:
-                    # Constant propagation: store literal value
+
                     constant_values[instr.result] = instr.arg1
                     optimized_instructions.append(instr)
+
             elif instr.label is not None:
+
                 # Create fresh scope on a new block
                 optimized_instructions.append(instr)
                 constant_values = {}
+
             else:
                 if instr.arg1 in constant_values:
                     arg1 = constant_values[instr.arg1]
