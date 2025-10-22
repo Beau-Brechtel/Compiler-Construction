@@ -10,6 +10,7 @@ from Errors import LexerError
 from Errors import ParsingError
 import constantFoldingOptimization
 import tempVariableRemoverOptimization
+import algebraicSimplificationOptimization
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -69,6 +70,7 @@ def main():
     arg_parser.add_argument('-p', '--parser', action='store_true', help='Print parser output AST and symbol table')
     arg_parser.add_argument('-t', '--tac', action='store_true', help='Print TAC output')
     arg_parser.add_argument('-o1', '--opt1', action='store_true', help='Enable optimization 1')
+    arg_parser.add_argument('-o2', '--opt2', action='store_true', help='Enable optimization 2')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -124,6 +126,27 @@ def main():
         optimized_instructions = CF.optimize()
         tVR = tempVariableRemoverOptimization.tempVarRemover(optimized_instructions)
         optimized_instructions = tVR.optimize()
+        print("Three Address Code (TAC):")
+        for instr in optimized_instructions:
+            print(instr)
+        print()
+
+    if args.opt2:
+        print("Running optimization 2 on TAC")
+        optimized_instructions = Three_Address_Code.instructions
+        while True:
+            previous_instructions = optimized_instructions
+            ASO = algebraicSimplificationOptimization.AlgebraicSimplificationOptimization(previous_instructions)
+            optimized_instructions = ASO.optimize()
+            tVR = tempVariableRemoverOptimization.tempVarRemover(optimized_instructions)
+            optimized_instructions = tVR.optimize()
+            CF = constantFoldingOptimization.ConstantFoldingOptimization(optimized_instructions)
+            optimized_instructions = CF.optimize()
+
+            # Break if no changes were made
+            if optimized_instructions == previous_instructions:
+                break
+                
         print("Three Address Code (TAC):")
         for instr in optimized_instructions:
             print(instr)
