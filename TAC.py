@@ -12,7 +12,7 @@ class TAC:
 
     # Helper function to generate temporary variable names
     def generate_fresh_variable(self):
-        var_name = f"t{self.temp_var_count}"
+        var_name = f"%temp{self.temp_var_count}"
         self.temp_var_count += 1
         return var_name
 
@@ -45,7 +45,7 @@ class TAC:
         entry = self.symbol_table.lookup(identifier, scope)
         return entry is not None and entry.kind == 'function'
         
-    # Returns the nth child of node starting with 0
+    # Returns the nth child of node
     def get_nth_child(self, node, n):
         current = node.down if node else None
         for _ in range(n):
@@ -73,7 +73,7 @@ class TAC:
                     self.generate_TAC(child, scope=scope)
                 return None
 
-        # Handles function definitions
+        # Handles function definitions and calls
         if token_type == TokenType.IDENTIFIER and self.identifier_is_function(node.get_token().value, scope):
             first_child = self.get_first_child(node)
     

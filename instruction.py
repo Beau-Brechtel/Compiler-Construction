@@ -26,7 +26,6 @@ class Instruction:
         elif self.operator == 'return':
             parts.append(f"return {self.arg1}")
         elif self.operator is not None or self.result is not None or self.arg1 is not None or self.arg2 is not None:
-            # Fallback for any other instruction types
             instruction_parts = []
             if self.result is not None:
                 instruction_parts.append(f"{self.result}")

@@ -11,6 +11,7 @@ from Errors import ParsingError
 import constantFoldingOptimization
 import tempVariableRemoverOptimization
 import algebraicSimplificationOptimization
+import candcPropagation
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -134,19 +135,27 @@ def main():
     if args.opt2:
         print("Running optimization 2 on TAC")
         optimized_instructions = Three_Address_Code.instructions
+        tVR = tempVariableRemoverOptimization.tempVarRemover(optimized_instructions)
+        optimized_instructions = tVR.optimize()  
         while True:
-            previous_instructions = optimized_instructions
-            ASO = algebraicSimplificationOptimization.AlgebraicSimplificationOptimization(previous_instructions)
+            previous_tac = [str(instr) for instr in optimized_instructions]
+            
+            ASO = algebraicSimplificationOptimization.AlgebraicSimplificationOptimization(optimized_instructions)
             optimized_instructions = ASO.optimize()
-            tVR = tempVariableRemoverOptimization.tempVarRemover(optimized_instructions)
-            optimized_instructions = tVR.optimize()
             CF = constantFoldingOptimization.ConstantFoldingOptimization(optimized_instructions)
             optimized_instructions = CF.optimize()
+            CP = candcPropagation.CandCPropagation(optimized_instructions)
+            optimized_instructions = CP.optimize()
 
+            # Compare string representations
+            current_tac = [str(instr) for instr in optimized_instructions]
+            
             # Break if no changes were made
-            if optimized_instructions == previous_instructions:
+            if current_tac == previous_tac:
                 break
-                
+        
+
+              
         print("Three Address Code (TAC):")
         for instr in optimized_instructions:
             print(instr)

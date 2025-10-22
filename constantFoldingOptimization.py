@@ -5,6 +5,10 @@ class ConstantFoldingOptimization:
         self.instructions = instructions
 
     def is_numeric(self, value):
+        # First check if it's already a number
+        if isinstance(value, (int, float)):
+            return True
+        # Then check if it's a numeric string
         if isinstance(value, str):
             try:
                 if '.' in value:
