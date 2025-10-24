@@ -100,3 +100,17 @@ TempVarRemoverOptimization.py
         x = t1
         This would just become
         x = 1 + 2
+    - Had to fix and rename temp varibales to include % to not throw off other optimizations
+
+AlgerbraicSimplificationOptimization.py 
+    - Simplifies small algebra things like x + 0, x - 0, x * 1, x / 1, ...
+
+ConstantPropagation.py
+    - propagates constants across instruction that are inside on one basic block
+    - Once we hit a new label refresh the dictionary holding our constants so that we don't go across basic blocks
+
+EasyDeadCodeElimination
+    - Looks through the whole c program and adds live variables
+    - Then loops through again and gets rid of unused variables
+    - Not on a basic block scale but on a program level
+
