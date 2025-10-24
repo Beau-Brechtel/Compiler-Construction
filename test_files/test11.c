@@ -12,5 +12,5 @@ int main() {
     int result = add(localVar, globalVar);
     add(3, 4);
 
-    return localVar + globalVar;
+    return localVar + globalVar + result;
 }

@@ -12,6 +12,7 @@ import constantFoldingOptimization
 import tempVariableRemoverOptimization
 import algebraicSimplificationOptimization
 import candcPropagation
+import easyDeadCodeElimination as eas
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -74,6 +75,7 @@ def main():
     arg_parser.add_argument('-o2', '--opt2', action='store_true', help='Enable optimization 2')
     arg_parser.add_argument('-c', '--candc', action='store_true', help='Enable constant and copy propagation optimization')
     arg_parser.add_argument('-a', '--algebraic', action='store_true', help='Enable algebraic simplification optimization')
+    arg_parser.add_argument('-b', '--basicblocks', action='store_true', help='Print basic blocks generated from TAC')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -148,6 +150,8 @@ def main():
             optimized_instructions = CF.optimize()
             CP = candcPropagation.CandCPropagation(optimized_instructions)
             optimized_instructions = CP.optimize()
+            EDC = eas.EasyDeadCodeElimination(optimized_instructions)
+            optimized_instructions = EDC.optimize()
 
             # Break if no changes were made
             current_tac = [str(instr) for instr in optimized_instructions]
@@ -179,6 +183,6 @@ def main():
             print(instr)
         print()
 
-        
+
 if __name__ == "__main__":
     main()
