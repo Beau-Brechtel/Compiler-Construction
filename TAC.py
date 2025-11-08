@@ -18,13 +18,13 @@ class TAC:
 
     # Helper function to generate unique labels names
     def generate_fresh_label(self):
-        label_name = f"L{self.temp_label_count}"
+        label_name = f"%L{self.temp_label_count}"
         self.temp_label_count += 1
         return label_name
 
     # Function to add a new instruction to the TAC list
-    def add_instruction(self, label=None, operator=None, arg1=None, arg2=None, result=None):
-        instr = instruction.Instruction(label, operator, arg1, arg2, result)
+    def add_instruction(self, label=None, operator=None, arg1=None, arg2=None, result=None, function_call=False):
+        instr = instruction.Instruction(label, operator, arg1, arg2, result, function_call=function_call)
         self.instructions.append(instr)
         return instr
     
@@ -227,7 +227,7 @@ class TAC:
                 parameter_list.append(param_result)
         
         temp_var = self.generate_fresh_variable()
-        self.add_instruction(operator='call', arg1=function_name, arg2=','.join(parameter_list), result=temp_var)
+        self.add_instruction(operator='call', arg1=function_name, arg2=','.join(parameter_list), result=temp_var, function_call=True)
         return temp_var
        
 

@@ -1,6 +1,6 @@
-float main() {
-    float x = 5.0;
-    float y = 3.14;
-    float z = x + y; 
+int main() {
+    int x = 5;
+    int y = 3;
+    int z = x / 5; 
     return z;
 }

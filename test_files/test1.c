@@ -4,9 +4,9 @@ int main() {
 
     if (x > 5) {
         y = y + 5;
-    } else if( x < 5) {
+    } else if (x == 5) {
         y = y - 5;
-    } else {
+    } else if (y != 30) {
         y = y * 2;
     }
 

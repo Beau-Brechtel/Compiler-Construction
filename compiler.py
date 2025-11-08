@@ -13,6 +13,8 @@ import tempVariableRemoverOptimization
 import algebraicSimplificationOptimization
 import candcPropagation
 import easyDeadCodeElimination as eas
+import assembler
+
 
 # Sets up and runs the lexer
 # input: source code as string
@@ -76,6 +78,7 @@ def main():
     arg_parser.add_argument('-c', '--candc', action='store_true', help='Enable constant and copy propagation optimization')
     arg_parser.add_argument('-a', '--algebraic', action='store_true', help='Enable algebraic simplification optimization')
     arg_parser.add_argument('-b', '--basicblocks', action='store_true', help='Print basic blocks generated from TAC')
+    arg_parser.add_argument('-x', '--assemble', action='store_true', help='Generate assembly code from TAC')
     args = arg_parser.parse_args()
     
     # See if input file exists
@@ -118,6 +121,7 @@ def main():
     # Run TAC generation
     Three_Address_Code = TAC.TAC(my_symbol_table)
     Three_Address_Code.generate_TAC(AST)
+    optimized_instructions = None
     if args.tac:
         print("Three Address Code (TAC):")
         for instr in Three_Address_Code.instructions:
@@ -183,6 +187,19 @@ def main():
             print(instr)
         print()
 
+    if optimized_instructions is not None:
+            optimized_instructions = optimized_instructions
+    else:
+            optimized_instructions = Three_Address_Code.instructions
+    asm_instructions = assembler.assembler()
+    assembly_code = asm_instructions.assemble(optimized_instructions)
+    if args.assemble:
+
+        print("Assembly Code:")
+        print()
+        for instr in assembly_code:
+            print(instr)
+        print()
 
 if __name__ == "__main__":
     main()

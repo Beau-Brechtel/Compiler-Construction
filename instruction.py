@@ -1,12 +1,13 @@
 # https://www.geeksforgeeks.org/compiler-design/three-address-code-compiler/
 # Used for object design of what an instruction is
 class Instruction:
-    def __init__(self, label=None, operator=None, arg1=None, arg2=None, result=None):
+    def __init__(self, label=None, operator=None, arg1=None, arg2=None, result=None, function_call=False):
         self.label = label
         self.operator = operator
         self.arg1 = arg1
         self.arg2 = arg2
         self.result = result
+        self.function_call = function_call
 
     def __str__(self):
         parts = []
