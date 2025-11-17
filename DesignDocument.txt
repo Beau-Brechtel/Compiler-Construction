@@ -114,3 +114,14 @@ EasyDeadCodeElimination
     - Then loops through again and gets rid of unused variables
     - Not on a basic block scale but on a program level
 
+AssemblyInstruction.py
+    - Assembly instruction object with operation, destination, source, and label fields
+    - Provides formatted output for x86-64 assembly code
+
+Assembler.py
+    - Translates TAC to x86-64 assembly language
+    - Maps function parameters to positive stack offsets (rbp+16, rbp+24, etc.)
+    - Maps local variables to negative stack offsets (rbp-4, rbp-8, etc.)
+    - Handles function prologue/epilogue 
+    - Supports arithmetic, assignments, function calls, and control flow
+

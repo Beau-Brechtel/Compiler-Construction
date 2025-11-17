@@ -191,7 +191,7 @@ def main():
             optimized_instructions = optimized_instructions
     else:
             optimized_instructions = Three_Address_Code.instructions
-    asm_instructions = assembler.assembler()
+    asm_instructions = assembler.assembler(my_symbol_table)
     assembly_code = asm_instructions.assemble(optimized_instructions)
     if args.assemble:
 
