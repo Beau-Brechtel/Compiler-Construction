@@ -2,6 +2,7 @@ from instruction import Instruction
 from assemblyInstruction import AssemblyInstruction
 from SymbolTable import symbol_table
 
+# Used chatgpt to help figure out how to convert to assembly and to check output
 class assembler:
 
     def __init__(self, symbol_table):
