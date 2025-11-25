@@ -22,11 +22,17 @@ class assembler:
     
     # Format memory address with proper signs
     def format_memory_address(self, variable):
-        offset = self.variable_map[variable]
-        if offset >= 0:
-            return f"[rbp+{offset}]"
+        location = self.variable_map[variable]
+        
+        # Check if it's a register name (string)
+        if isinstance(location, str):
+            return location  # Return register name directly (rdi, rsi, rdx, rcx)
+        
+        # Otherwise it's a stack offset
+        if location >= 0:
+            return f"[rbp+{location}]"
         else:
-            return f"[rbp{offset}]"  
+            return f"[rbp{location}]"  # negative already includes the minus sign  
 
     # Map all the variables in order to allocate space on stack
     def mapVariables(self, instructions, function_name):
@@ -56,20 +62,27 @@ class assembler:
                 if instr.arg2 and not self.isNumeric(instr.arg2):
                     variables_seen.add(instr.arg2)
 
-        # Map function parameters at positive offsets 
+        # Map function parameters using x86-64 calling convention
+        # First 4 params in registers: rdi, rsi, rdx, rcx
+        # Additional params on stack at positive offsets
         function_params = self.symbol_table.get_function_params(function_name)
         param_names = set()
-        param_offset = 16  
+        param_registers = ["rdi", "rsi", "rdx", "rcx"]
+        param_offset = 16  # Stack parameters start at rbp+16
+        
         if function_params is not None:
-            for params in function_params:
-                self.variable_map[params.name] = param_offset
+            for i, params in enumerate(function_params):
+                if i < 4:  # First 4 parameters are in registers
+                    self.variable_map[params.name] = param_registers[i]
+                else:  # Additional parameters on stack
+                    self.variable_map[params.name] = param_offset
+                    param_offset += 8
                 param_names.add(params.name)  
-                param_offset += 8  
 
         # Map local variables at negative offsets
         for var in variables_seen:
             if var not in param_names:  
-                offset += 4
+                offset += 8
                 self.variable_map[var] = -offset
                 
         self.size_to_allocate = ((offset + 15) // 16) * 16
@@ -204,12 +217,30 @@ class assembler:
 
             # Translate TAC function call to assembly
             elif instr.function_call:
-                # Handle Parameters
-                number_of_params = 0
+                # Handle Parameters using 4-register calling convention
+                # First 4 params in registers: rdi, rsi, rdx, rcx
+                # 5th+ params on stack (pushed in reverse order)
+                number_of_stack_params = 0
+                param_registers = ["rdi", "rsi", "rdx", "rcx"]
+                
                 if instr.arg2:
                     params = instr.arg2.split(',')
-                    for param in reversed(params):
-                        number_of_params += 1
+                    
+                    # First, handle register parameters (1st-4th)
+                    for i, param in enumerate(params):
+                        if i < 4:  # First 4 parameters go in registers
+                            if self.isNumeric(param):
+                                self.addInstruction("mov", param_registers[i], str(param))
+                            else:
+                                source = self.format_memory_address(param)
+                                self.addInstruction("mov", "rax", source)
+                                self.addInstruction("mov", param_registers[i], "rax")
+                    
+                    # Then, handle stack parameters (5th+) in REVERSE order
+                    # This ensures 5th param ends up at [rbp+16], 6th at [rbp+24], etc.
+                    stack_params = params[4:]  # Get 5th+ parameters
+                    for param in reversed(stack_params):
+                        number_of_stack_params += 1
                         if self.isNumeric(param):
                             self.addInstruction("mov", "rax", str(param))
                         else:
@@ -223,9 +254,9 @@ class assembler:
                 destination = self.format_memory_address(instr.result)
                 self.addInstruction("mov", destination, "rax")
 
-                # Clean up parameters from stack (
-                if number_of_params > 0:
-                    self.addInstruction("add", "rsp", str(number_of_params * 8))
+                # Clean up stack parameters (only those beyond the first 4)
+                if number_of_stack_params > 0:
+                    self.addInstruction("add", "rsp", str(number_of_stack_params * 8))
 
                     
 
