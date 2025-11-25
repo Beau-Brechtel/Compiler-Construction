@@ -48,7 +48,6 @@ class assembler:
                 in_target_function = True
                 continue
             
-            
             if instr.label and not instr.label.startswith('%') and instr.label != function_name and in_target_function:
                 break
             
@@ -62,7 +61,6 @@ class assembler:
                 if instr.arg2 and not self.isNumeric(instr.arg2):
                     variables_seen.add(instr.arg2)
 
-        # Map function parameters using x86-64 calling convention
         # First 4 params in registers: rdi, rsi, rdx, rcx
         # Additional params on stack at positive offsets
         function_params = self.symbol_table.get_function_params(function_name)
@@ -72,9 +70,9 @@ class assembler:
         
         if function_params is not None:
             for i, params in enumerate(function_params):
-                if i < 4:  # First 4 parameters are in registers
+                if i < 4:  
                     self.variable_map[params.name] = param_registers[i]
-                else:  # Additional parameters on stack
+                else: 
                     self.variable_map[params.name] = param_offset
                     param_offset += 8
                 param_names.add(params.name)  
@@ -217,18 +215,17 @@ class assembler:
 
             # Translate TAC function call to assembly
             elif instr.function_call:
-                # Handle Parameters using 4-register calling convention
+         
                 # First 4 params in registers: rdi, rsi, rdx, rcx
-                # 5th+ params on stack (pushed in reverse order)
+                # 5th+ params on stack 
                 number_of_stack_params = 0
                 param_registers = ["rdi", "rsi", "rdx", "rcx"]
                 
                 if instr.arg2:
                     params = instr.arg2.split(',')
                     
-                    # First, handle register parameters (1st-4th)
                     for i, param in enumerate(params):
-                        if i < 4:  # First 4 parameters go in registers
+                        if i < 4:  
                             if self.isNumeric(param):
                                 self.addInstruction("mov", param_registers[i], str(param))
                             else:
@@ -236,9 +233,7 @@ class assembler:
                                 self.addInstruction("mov", "rax", source)
                                 self.addInstruction("mov", param_registers[i], "rax")
                     
-                    # Then, handle stack parameters (5th+) in REVERSE order
-                    # This ensures 5th param ends up at [rbp+16], 6th at [rbp+24], etc.
-                    stack_params = params[4:]  # Get 5th+ parameters
+                    stack_params = params[4:]
                     for param in reversed(stack_params):
                         number_of_stack_params += 1
                         if self.isNumeric(param):
@@ -254,7 +249,7 @@ class assembler:
                 destination = self.format_memory_address(instr.result)
                 self.addInstruction("mov", destination, "rax")
 
-                # Clean up stack parameters (only those beyond the first 4)
+                # Clean up stack parameters 
                 if number_of_stack_params > 0:
                     self.addInstruction("add", "rsp", str(number_of_stack_params * 8))
 
