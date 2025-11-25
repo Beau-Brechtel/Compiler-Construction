@@ -111,18 +111,18 @@ class assembler:
                     self.addInstruction("mov", destination, str(instr.arg1))
                 else:
                     source = self.format_memory_address(instr.arg1)
-                    self.addInstruction("mov", "eax", source)
-                    self.addInstruction("mov", destination, "eax")
+                    self.addInstruction("mov", "rax", source)
+                    self.addInstruction("mov", destination, "rax")
 
             # Translate TAC arithmatic operations(not division) to assembly
             elif instr.operator in ('+', '-', '*', '<', '>', '==', '!='):
                 destination = self.format_memory_address(instr.result)
 
                 if self.isNumeric(instr.arg1):
-                    self.addInstruction("mov", "eax", str(instr.arg1))
+                    self.addInstruction("mov", "rax", str(instr.arg1))
                 else:
                     source1 = self.format_memory_address(instr.arg1)
-                    self.addInstruction("mov", "eax", source1)
+                    self.addInstruction("mov", "rax", source1)
                 
                 if self.isNumeric(instr.arg2):
                     source2 = str(instr.arg2)
@@ -131,70 +131,70 @@ class assembler:
 
 
                 if instr.operator == '+':
-                    self.addInstruction("add", "eax", source2)
+                    self.addInstruction("add", "rax", source2)
                 elif instr.operator == '-':
-                    self.addInstruction("sub", "eax", source2)
+                    self.addInstruction("sub", "rax", source2)
                 elif instr.operator == '*':
-                    self.addInstruction("imul", "eax", source2) 
+                    self.addInstruction("imul", "rax", source2)
                 elif instr.operator == '<':
-                    self.addInstruction("cmp", "eax", source2)
+                    self.addInstruction("cmp", "rax", source2)
                     self.addInstruction("setl", "al")
-                    self.addInstruction("movzx", "eax", "al")
+                    self.addInstruction("movzx", "rax", "al")
                 elif instr.operator == '>':
-                    self.addInstruction("cmp", "eax", source2)
+                    self.addInstruction("cmp", "rax", source2)
                     self.addInstruction("setg", "al")
-                    self.addInstruction("movzx", "eax", "al")
+                    self.addInstruction("movzx", "rax", "al")
                 elif instr.operator == '==':
-                    self.addInstruction("cmp", "eax", source2)
+                    self.addInstruction("cmp", "rax", source2)
                     self.addInstruction("sete", "al")
-                    self.addInstruction("movzx", "eax", "al")
+                    self.addInstruction("movzx", "rax", "al")
                 elif instr.operator == '!=':
-                    self.addInstruction("cmp", "eax", source2)
+                    self.addInstruction("cmp", "rax", source2)
                     self.addInstruction("setne", "al")
-                    self.addInstruction("movzx", "eax", "al")
-                
-                self.addInstruction("mov", destination, "eax")
+                    self.addInstruction("movzx", "rax", "al")
+
+                self.addInstruction("mov", destination, "rax")
 
             # Translate TAC division to assembly
             elif instr.operator == '/':
                 destination = self.format_memory_address(instr.result)
 
                 if self.isNumeric(instr.arg1):
-                    self.addInstruction("mov", "eax", str(instr.arg1))
+                    self.addInstruction("mov", "rax", str(instr.arg1))
                 else:
                     source1 = self.format_memory_address(instr.arg1)
-                    self.addInstruction("mov", "eax", source1)
+                    self.addInstruction("mov", "rax", source1)
 
                 self.addInstruction("cdq")
 
                 if self.isNumeric(instr.arg2):
                     source2 = str(instr.arg2)
-                    self.addInstruction("mov", "ecx", source2)
-                    self.addInstruction("idiv", "ecx")
+                    self.addInstruction("mov", "rcx", source2)
+                    self.addInstruction("idiv", "rcx")
                 else:
                     source2 = self.format_memory_address(instr.arg2)
                     self.addInstruction("idiv", source2)
 
-                self.addInstruction("mov", destination, "eax")
+                self.addInstruction("mov", destination, "rax")
             
             # Translate TAC return to assembly
             elif instr.operator == 'return':
                 if instr.arg1:
                     if self.isNumeric(instr.arg1):
-                        self.addInstruction("mov", "eax", str(instr.arg1))
+                        self.addInstruction("mov", "rax", str(instr.arg1))
                     else:
                         source = self.format_memory_address(instr.arg1)
-                        self.addInstruction("mov", "eax", source)
+                        self.addInstruction("mov", "rax", source)
 
             # Translate TAC if to assembly
             elif instr.operator == 'if':
                 if self.isNumeric(instr.arg1):
-                    self.addInstruction("mov", "eax", str(instr.arg1))
+                    self.addInstruction("mov", "rax", str(instr.arg1))
                 else:
                     source = self.format_memory_address(instr.arg1)
-                    self.addInstruction("mov", "eax", source)
+                    self.addInstruction("mov", "rax", source)
 
-                self.addInstruction("cmp", "eax", "0")
+                self.addInstruction("cmp", "rax", "0")
                 self.addInstruction("jne", instr.arg2)      
                 self.addInstruction("jmp", instr.result)
 
@@ -211,17 +211,17 @@ class assembler:
                     for param in reversed(params):
                         number_of_params += 1
                         if self.isNumeric(param):
-                            self.addInstruction("mov", "eax", str(param))
+                            self.addInstruction("mov", "rax", str(param))
                         else:
                             source = self.format_memory_address(param)
-                            self.addInstruction("mov", "eax", source)
-                        self.addInstruction("push", "eax")
+                            self.addInstruction("mov", "rax", source)
+                        self.addInstruction("push", "rax")
 
                 # Call function
                 self.addInstruction("call", instr.arg1)
 
                 destination = self.format_memory_address(instr.result)
-                self.addInstruction("mov", destination, "eax")
+                self.addInstruction("mov", destination, "rax")
 
                 # Clean up parameters from stack (
                 if number_of_params > 0:
